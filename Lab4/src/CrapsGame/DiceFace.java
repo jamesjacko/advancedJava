@@ -8,6 +8,8 @@ import javax.swing.*;
    Revised and tested 10/06/2010
 */
 
+
+
 public class DiceFace
 {
    // Holds the seven possible dot positions on a standard die
@@ -18,9 +20,19 @@ public class DiceFace
    private int yTop;
    private int side;
    private int diceValue;
+   
+   //added faceColor to allow user to color the die
    private Color faceColor;
 
-   public DiceFace(int s, int x, int y, int v, Color faceColor)
+    /**
+     * Dice Face constructor
+     * @param s the dimension of the face
+     * @param x the x position
+     * @param y y position
+     * @param v face value
+     * @param faceColor color of the face
+     */
+    public DiceFace(int s, int x, int y, int v, Color faceColor)
    {
       side = s;		// dimension of dice face
 		xLeft = x;		// position
@@ -29,20 +41,35 @@ public class DiceFace
                 this.faceColor = faceColor;
    }
    
-   public void setDiceFace(int v)
+    /**
+     * set the face value of the die 
+     * @param v the value to set to
+     */
+    public void setDiceFace(int v)
    {
       diceValue = v;
    }   
+    
+    /**
+     * Set the coordinates of the die
+     * @param x the x position
+     * @param y the y position 
+     */
    public void setCoords(int x, int y){
        xLeft = x;
        yTop = y;
    }
-   public void draw(Graphics2D g2)
+
+    /**
+     * draw the die
+     * @param g2 the graphics object used to draw
+     */
+    public void draw(Graphics2D g2)
    {
 		box = new Rectangle(xLeft, yTop, side, side);
       makeDots();
 
-      // Black background
+      // set the facecolor of the die
 		g2.setColor(faceColor);
       g2.fill(box);
       
@@ -77,8 +104,10 @@ public class DiceFace
        }
    }
 
-
-   public void makeDots()
+    /**
+     *
+     */
+    public void makeDots()
    {
       int w = side/6;   // dot width
       int h = side/6;   // dot height

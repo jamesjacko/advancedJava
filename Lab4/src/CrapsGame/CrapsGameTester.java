@@ -1,20 +1,30 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * @title Craps Game Tester
+ * @description Tests the logic of the CrapsGame Class
+ * @author James Jackson
+ * @date 04/11/2014
  */
 package CrapsGame;
 
 import java.util.Arrays;
 
-/**
- *
- * @author User
- */
 public class CrapsGameTester {
+
     public static void main(String[] args){
-        CrapsGameFrame game = new CrapsGameFrame("Craps Game");
+        CrapsGame game = new CrapsGame();
         
-        
+        String message = game.doFirstRoll();
+        System.out.println(message);
+
+        while(!game.isOver())
+        { 
+        message = game.rollAgain();
+        System.out.println(message);
+        }
+
+        if(game.isWon())
+        System.out.println("You win, big man!");
+        else
+        System.out.println("Loser ..."); 
     }
 }
