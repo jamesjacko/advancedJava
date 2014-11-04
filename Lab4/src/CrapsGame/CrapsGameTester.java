@@ -5,12 +5,16 @@
  */
 package CrapsGame;
 
+import java.util.Arrays;
+
 /**
  *
  * @author User
  */
 public class CrapsGameTester {
     public static void main(String[] args){
-        CrapsGameFrame frame = new CrapsGameFrame("Craps Game");
+        CrapsGameFrame game = new CrapsGameFrame("Craps Game");
+        
+        
     }
 }
