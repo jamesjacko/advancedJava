@@ -31,10 +31,22 @@ public class CalculatorFrame extends JFrame {
     }
     private JPanel buildTop(){
         JPanel pnlTop = new JPanel(new BorderLayout());
-             input = new JTextField();
-             input.setPreferredSize(new Dimension(50,50));
-             input.setHorizontalAlignment(JTextField.RIGHT);
-             pnlTop.add(input, BorderLayout.NORTH);
+            input = new JTextField();
+            input.setPreferredSize(new Dimension(50,50));
+            input.setHorizontalAlignment(JTextField.RIGHT);
+            input.setEditable(false);
+            pnlTop.add(input, BorderLayout.NORTH);
+            JPanel ctrlPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING, 0,0));
+                String[] ctrlBtnLabels = {"Backspace", "CE", "C"};
+                JButton[] ctrlButtons = new JButton[ctrlBtnLabels.length];
+                for(int i = 0; i < ctrlBtnLabels.length; i++){
+                   ctrlButtons[i] = new JButton(ctrlBtnLabels[i]);
+                   ctrlButtons[i].setPreferredSize(new Dimension(83, 50));
+                   ctrlButtons[i].setForeground(Color.BLUE);
+                   ctrlButtons[i].setFont(new Font("Dialog", Font.BOLD, 12));
+                   ctrlPanel.add(ctrlButtons[i]);
+                }
+            pnlTop.add(ctrlPanel, BorderLayout.SOUTH);
         return pnlTop;
     }
     private JPanel buildMemoryButtons(){
