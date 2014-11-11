@@ -5,6 +5,8 @@
  */
 package calculator;
 
+import javax.swing.BorderFactory;
+
 /**
  *
  * @author jacko
