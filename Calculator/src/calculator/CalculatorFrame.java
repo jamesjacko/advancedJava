@@ -143,9 +143,9 @@ public class CalculatorFrame extends JFrame {
         }
     }
     public void clearEntry(){
-        if(opPointer == 1 && !operation){
-            opPointer = 0;
+        if(opPointer == 1 && !operands[1].equals("")){
             operands[1] = "";
+            operation = true;
         } else if (operation){
             opPointer = 0;
             operands[1] = "";
@@ -163,6 +163,61 @@ public class CalculatorFrame extends JFrame {
        this.operands[1] = "";
        this.input.setText("0");
     }
+    
+    public void operatorPress(String operator){
+        operation = true;
+        // Sorted array of operators, needed for binary search
+        String[] coreOperators = {"*", "+", "-", "/"};
+        curValue = input.getText();
+        if(Arrays.binarySearch(coreOperators, operator) > -1){
+            if(opPointer == 0){
+                operands[0] = input.getText();
+                curValue = curValue + operator;
+                input.setText(curValue);
+                opPointer = 1;
+                answer = Double.parseDouble(operands[0]);
+            }else{
+                equals(operator);
+            }
+            curOperator = operator;
+
+        }else if(operator.equals("=")){
+            if(operands[1] != ""){
+                equals("");
+            }else{
+                input.setText(curValue);
+                answer = Double.parseDouble(curValue);
+            }
+        }else if(operator.equals("sqrt")){
+            answer = Math.sqrt(Double.parseDouble(input.getText()));
+            curValue = Double.toString(answer);
+            operands[0] = curValue;
+            operands[1] = "";
+            input.setText(curValue);
+        }else if(operator.equals("%")){
+            operands[opPointer] = Double.toString(Double.parseDouble(operands[0]) * Double.parseDouble(operands[opPointer]) / 100.0);
+            curValue = operands[opPointer];
+
+            input.setText(curValue);
+        }
+    }
+    
+    private void equals(String operator){
+        answer = calculate(curOperator, operands[0], operands[1]);
+        String strAnswer;
+        if ((answer == Math.floor(answer)) && !Double.isInfinite(answer)) {
+            strAnswer = Integer.toString((int)Math.round(answer));
+        }else{
+            strAnswer = Double.toString(answer);
+        }
+        operands[0] = strAnswer;
+        operands[1] = "";
+        curValue = strAnswer + operator;
+        input.setText(curValue);
+        opPointer = 1;
+        answer = Double.parseDouble(strAnswer);
+    }
+    
     private class numButtonListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
             operation = false;
@@ -181,64 +236,16 @@ public class CalculatorFrame extends JFrame {
     
     private class operatorListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            operation = true;
-            JButton pressed = (JButton) e.getSource();
-            // Sorted list of operators
-            String[] coreOperators = {"*", "+", "-", "/"};
+            
+            JButton pressed = (JButton) e.getSource();            
             String operator = pressed.getText();
-            curValue = input.getText();
-            if(Arrays.binarySearch(coreOperators, operator) > -1){
-                if(opPointer == 0){
-                    operands[0] = input.getText();
-                    curValue = curValue + operator;
-                    input.setText(curValue);
-                    opPointer = 1;
-                    answer = Double.parseDouble(operands[0]);
-                }else{
-                    equals(operator);
-                }
-                curOperator = pressed.getText();
-                System.out.println("" + opPointer);
-                
-            }else if(operator.equals("=")){
-                if(operands[1] != ""){
-                    equals("");
-                }else{
-                    input.setText(curValue);
-                    answer = Double.parseDouble(curValue);
-                }
-            }else if(operator.equals("sqrt")){
-                answer = Math.sqrt(Double.parseDouble(input.getText()));
-                curValue = Double.toString(answer);
-                operands[0] = curValue;
-                operands[1] = "";
-                input.setText(curValue);
-            }else if(operator.equals("%")){
-                operands[opPointer] = Double.toString(Double.parseDouble(operands[0]) * Double.parseDouble(operands[opPointer]) / 100.0);
-                curValue = operands[opPointer];
-                
-                input.setText(curValue);
-            }
+            operatorPress(operator);
             
             
             
         }
         
-        private void equals(String operator){
-            answer = calculate(curOperator, operands[0], operands[1]);
-            String strAnswer;
-            if ((answer == Math.floor(answer)) && !Double.isInfinite(answer)) {
-                strAnswer = Integer.toString((int)Math.round(answer));
-            }else{
-                strAnswer = Double.toString(answer);
-            }
-            operands[0] = strAnswer;
-            operands[1] = "";
-            curValue = strAnswer + operator;
-            input.setText(curValue);
-            opPointer = 1;
-            answer = Double.parseDouble(strAnswer);
-        }
+        
     }
     
     
