@@ -8,6 +8,7 @@ package calculator;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import javax.swing.border.*;
 public class CalculatorFrame extends JFrame {
@@ -18,20 +19,19 @@ public class CalculatorFrame extends JFrame {
     private int opPointer = 0;
     private String curOperator;
     private Double answer = 0.0;
-    private Boolean operation = false;
+    private Boolean operation, grouping = false;
+    private Calculator calc = new Calculator();
     public CalculatorFrame(){
         super("Calculator");
         add(buildLayout());
         setVisible(true);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setJMenuBar(new CalculatorMenu());
         pack();
         
     }
 
-    private void buildMenu(){
-        
-    }
     private JPanel buildTop(){
         JPanel pnlTop = new JPanel(new BorderLayout());
             input = new JTextField("0");
@@ -82,7 +82,7 @@ public class CalculatorFrame extends JFrame {
                     numberButtons[i+h-1].setPreferredSize(new Dimension(50, 50));
                     numberButtons[i+h-1].setForeground(Color.BLUE);
                     numberButtons[i+h-1].setFont(new Font("Dialog", Font.BOLD, 12));
-                    numberButtons[i+h-1].addActionListener(new numButtonListener());
+                    numberButtons[i+h-1].addActionListener(new numButtonListener(this));
                     pnlNumberButtons.add(numberButtons[i+h-1]);
                 }
             }
@@ -112,23 +112,11 @@ public class CalculatorFrame extends JFrame {
         return pnlLayout;
     }
     
-    private double calculate(String op, String num1, String num2){
-        switch(op){
-            case "+":
-                return Double.parseDouble(num1) + Double.parseDouble(num2);
-            case "-":
-                return Double.parseDouble(num1) - Double.parseDouble(num2);
-            case "*":
-                return Double.parseDouble(num1) * Double.parseDouble(num2);
-            case "/":
-                return Double.parseDouble(num1) / Double.parseDouble(num2);
-        }
-        return 0.0;               
-        
-    }
-    private void setTextValue(){
+    
+    public void setTextValue(){
+        //calc.setOperand(operands[opPointer]);
         if(opPointer == 0){
-            String operator = (operation) ? curOperator : "";
+            String operator = (operation != null) ? curOperator : "";
             curValue = operands[0].equals("")? "0" + operator: operands[0] + operator;
         } else {
             String secOperand = operands[1].equals("")? "0": operands[1];
@@ -157,92 +145,95 @@ public class CalculatorFrame extends JFrame {
         
     }
     public void reset(){
-       this.curValue = "";
+       this.curValue = this.curOperator = this.operands[0] = this.operands[1] = "";
        this.opPointer = 0;
-       this.operands[0] = "";
-       this.operands[1] = "";
        this.input.setText("0");
+       calc.reset();
     }
     
     public void operatorPress(String operator){
+        
         operation = true;
         // Sorted array of operators, needed for binary search
         String[] coreOperators = {"*", "+", "-", "/"};
         curValue = input.getText();
+        
         if(Arrays.binarySearch(coreOperators, operator) > -1){
             if(opPointer == 0){
                 operands[0] = input.getText();
                 curValue = curValue + operator;
                 input.setText(curValue);
+                calc.setOperand(Double.parseDouble(operands[opPointer]));
+                calc.setOperator(operator);
                 opPointer = 1;
-                answer = Double.parseDouble(operands[0]);
             }else{
+                calc.setOperator(curOperator);
+                if(!operands[1].equals(""))
+                    calc.setOperand(Double.parseDouble(operands[opPointer]));
                 equals(operator);
             }
             curOperator = operator;
 
         }else if(operator.equals("=")){
-            if(operands[1] != ""){
-                equals("");
-            }else{
-                input.setText(curValue);
-                answer = Double.parseDouble(curValue);
-            }
+            calc.setOperand(Double.parseDouble(operands[opPointer]));
+            equals("");
         }else if(operator.equals("sqrt")){
-            answer = Math.sqrt(Double.parseDouble(input.getText()));
-            curValue = Double.toString(answer);
-            operands[0] = curValue;
-            operands[1] = "";
-            input.setText(curValue);
+            
+            calc.setOperand(Double.parseDouble(operands[opPointer]));
+            calc.sqrt();
+            equals("");
         }else if(operator.equals("%")){
-            operands[opPointer] = Double.toString(Double.parseDouble(operands[0]) * Double.parseDouble(operands[opPointer]) / 100.0);
-            curValue = operands[opPointer];
-
-            input.setText(curValue);
+            calc.setOperand(Double.parseDouble(operands[opPointer]));
+            calc.percent();
+            equals("");
         }
     }
     
     private void equals(String operator){
-        answer = calculate(curOperator, operands[0], operands[1]);
         String strAnswer;
-        if ((answer == Math.floor(answer)) && !Double.isInfinite(answer)) {
-            strAnswer = Integer.toString((int)Math.round(answer));
-        }else{
-            strAnswer = Double.toString(answer);
-        }
+        calc.equals();
+        calc.toString(true);
+        answer = calc.getAnswer();
+        System.out.println("" + answer);
+        strAnswer = noZero(answer);
         operands[0] = strAnswer;
         operands[1] = "";
         curValue = strAnswer + operator;
         input.setText(curValue);
         opPointer = 1;
-        answer = Double.parseDouble(strAnswer);
     }
     
-    private class numButtonListener implements ActionListener{
-        public void actionPerformed(ActionEvent e){
-            operation = false;
-            JButton pressed = (JButton) e.getSource();
-            String comp = pressed.getText();
-           
-            if(comp.equalsIgnoreCase("+/-"))
-                operands[opPointer] = (operands[opPointer].charAt(0) == '-')? operands[opPointer].substring(1) : "-" + operands[opPointer];
-            else if(comp.equalsIgnoreCase("."))
-                operands[opPointer] = (operands[opPointer].contains("."))? operands[opPointer] : operands[opPointer] + "." ;
-            else
-                operands[opPointer] += pressed.getText();
-            setTextValue();
-        }
+    public void negate(){
+        operands[opPointer] = (operands[opPointer].charAt(0) == '-')? operands[opPointer].substring(1) : "-" + operands[opPointer];
+    }
+    
+    public void addDecimal(){
+        operands[opPointer] = (operands[opPointer].contains("."))? operands[opPointer] : operands[opPointer] + "." ;
+    }
+    
+    public void addToOperand(String num){
+            operands[opPointer] += num;
+    }
+    
+    /**
+     * Helper method to strip of zeros for whole numbers
+     * @param num the number to be formatted
+     * @return the zero stripped number
+     */
+    private String noZero(Double num){
+        DecimalFormat d = new DecimalFormat("0.#########");
+        d.setGroupingUsed(this.grouping);
+        d.setGroupingSize(3);
+        String strNum;
+        strNum = d.format(num);
+        return strNum;
     }
     
     private class operatorListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            
             JButton pressed = (JButton) e.getSource();            
             String operator = pressed.getText();
             operatorPress(operator);
-            
-            
-            
         }
         
         
