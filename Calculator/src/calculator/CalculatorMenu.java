@@ -7,13 +7,18 @@ package calculator;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author jacko
  */
 public class CalculatorMenu extends JMenuBar {
-    
-    public CalculatorMenu(){
+    private CalculatorFrame frame;
+    public CalculatorMenu(CalculatorFrame frame){
+        this.frame = frame;
         add(editMenu());
         add(viewMenu());
         add(helpMenu());
@@ -26,7 +31,7 @@ public class CalculatorMenu extends JMenuBar {
         return menu;
     }
     private JMenu viewMenu(){
-        JMenu menu = new JMenu("Edit");
+        JMenu menu = new JMenu("View");
         menu.add(createMenuItem("Standard"));
         menu.add(createMenuItem("Scientific"));
         menu.addSeparator();
@@ -55,7 +60,28 @@ public class CalculatorMenu extends JMenuBar {
     private class menuListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
             JMenuItem clicked = (JMenuItem) e.getSource();
-            JOptionPane.showMessageDialog(null, clicked.getText());
+            switch(clicked.getText()){
+                case "Digit grouping":
+                    frame.setGrouping();
+                    break;
+                case "Help Topics":
+                    JFrame helpFrame = new JFrame("Help");
+                    JEditorPane helpPane = new JEditorPane();
+                    try {
+                        helpPane.setPage("file:///Users/jacko/Documents/uni/advancedJava/Calculator/src/calculator/help.html");
+                    } catch (IOException ex) {
+                        Logger.getLogger(CalculatorMenu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    helpPane.setEditable(false);
+                    helpPane.setBackground(Color.WHITE);
+                    JScrollPane scrollPane = new JScrollPane(helpPane);
+                    scrollPane.setBackground(Color.WHITE);
+                    helpFrame.add(scrollPane);
+                    helpFrame.setSize(500, 500);
+                    helpFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                    helpFrame.setVisible(true);
+                    break;
+            } 
         }
     }
     

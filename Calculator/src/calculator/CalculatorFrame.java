@@ -18,8 +18,8 @@ public class CalculatorFrame extends JFrame {
     private String[] operands = {"", ""};
     private int opPointer = 0;
     private String curOperator;
-    private Double answer = 0.0;
-    private Boolean operation, grouping = false;
+    private double answer = 0.0;
+    private boolean operation = false, grouping = false;
     private Calculator calc = new Calculator();
     public CalculatorFrame(){
         super("Calculator");
@@ -27,7 +27,7 @@ public class CalculatorFrame extends JFrame {
         setVisible(true);
         setResizable(false);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setJMenuBar(new CalculatorMenu());
+        setJMenuBar(new CalculatorMenu(this));
         pack();
         
     }
@@ -62,6 +62,7 @@ public class CalculatorFrame extends JFrame {
                 memButtons[i].setPreferredSize(new Dimension(50, 50));
                 memButtons[i].setForeground(Color.BLUE);
                 memButtons[i].setFont(new Font("Dialog", Font.BOLD, 12));
+                memButtons[i].addActionListener(new MemButtonListener(this));
                 pnlMemoryButtons.add(memButtons[i]);
             }
         return pnlMemoryButtons;
@@ -116,11 +117,11 @@ public class CalculatorFrame extends JFrame {
     public void setTextValue(){
         //calc.setOperand(operands[opPointer]);
         if(opPointer == 0){
-            String operator = (operation != null) ? curOperator : "";
-            curValue = operands[0].equals("")? "0" + operator: operands[0] + operator;
+            String operator = (operation && curOperator != null) ? curOperator : "";
+            curValue = operands[0].equals("")? "0" + operator: noZero(Double.parseDouble(operands[0].replace(",", ""))) + operator;
         } else {
-            String secOperand = operands[1].equals("")? "0": operands[1];
-            curValue = operands[0] + curOperator + secOperand;
+            String secOperand = operands[1].equals("")? "0": noZero(Double.parseDouble(operands[1].replace(",", "")));
+            curValue = noZero(Double.parseDouble(operands[0].replace(",", ""))) + curOperator + secOperand;
         }
         input.setText(curValue);
     }
@@ -151,16 +152,44 @@ public class CalculatorFrame extends JFrame {
        calc.reset();
     }
     
+    public void memoryClear(){
+        calc.memoryClear();
+    }
+    
+    public void memoryRecall(){
+        double mem = calc.memoryRecall();
+        calc.setOperand(mem);
+        operands[opPointer] = noZero(mem);
+        setTextValue();
+    }
+    
+    public void memoryStore(){
+        if(operands[opPointer] == "")
+            calc.setOperand(Double.parseDouble(operands[0]));
+        else
+            calc.setOperand(Double.parseDouble(operands[opPointer]));
+        calc.memoryStore();
+        System.out.println("here: " + calc.memoryRecall());
+    }
+    
+    public void memoryPlus(){
+        if(operands[opPointer] == "")
+            calc.setOperand(Double.parseDouble(operands[0]));
+        else
+            calc.setOperand(Double.parseDouble(operands[opPointer]));
+        calc.memoryPlus();
+    }
+    
     public void operatorPress(String operator){
         
         operation = true;
         // Sorted array of operators, needed for binary search
         String[] coreOperators = {"*", "+", "-", "/"};
-        curValue = input.getText();
+        curValue = input.getText().replace(",", "");
         
         if(Arrays.binarySearch(coreOperators, operator) > -1){
             if(opPointer == 0){
-                operands[0] = input.getText();
+                operands[0] = input.getText().replace(",", "");
                 curValue = curValue + operator;
                 input.setText(curValue);
                 calc.setOperand(Double.parseDouble(operands[opPointer]));
@@ -168,9 +197,14 @@ public class CalculatorFrame extends JFrame {
                 opPointer = 1;
             }else{
                 calc.setOperator(curOperator);
-                if(!operands[1].equals(""))
+                if(!operands[1].equals("")){
                     calc.setOperand(Double.parseDouble(operands[opPointer]));
-                equals(operator);
+                    equals(operator);
+                    setTextValue();
+                } else {
+                    curValue += operator;
+                    setTextValue();
+                }
             }
             curOperator = operator;
 
@@ -186,6 +220,9 @@ public class CalculatorFrame extends JFrame {
             calc.setOperand(Double.parseDouble(operands[opPointer]));
             calc.percent();
             equals("");
+        }else if(operator.equals("1/x")){
+            operands[opPointer] = Double.toString(1.0 / Double.parseDouble(operands[opPointer]));
+            setTextValue();
         }
     }
     
@@ -204,7 +241,10 @@ public class CalculatorFrame extends JFrame {
     }
     
     public void negate(){
-        operands[opPointer] = (operands[opPointer].charAt(0) == '-')? operands[opPointer].substring(1) : "-" + operands[opPointer];
+        if(opPointer == 1 && operands[1] == "")
+            operands[0] = (operands[0].charAt(0) == '-')? operands[0].substring(1) : "-" + operands[0];
+        else
+           operands[opPointer] = (operands[opPointer].charAt(0) == '-')? operands[opPointer].substring(1) : "-" + operands[opPointer];
     }
     
     public void addDecimal(){
@@ -212,7 +252,14 @@ public class CalculatorFrame extends JFrame {
     }
     
     public void addToOperand(String num){
-            operands[opPointer] += num;
+        operands[opPointer] += num;
+        operands[opPointer] = operands[opPointer];
+        setTextValue();
+    }
+    
+    public void setGrouping(){
+        grouping = !grouping;
+        setTextValue();
     }
     
     /**

@@ -13,14 +13,29 @@ public class MemButtonListener implements ActionListener  {
     public void actionPerformed(ActionEvent e){
         JButton pressed = (JButton) e.getSource();
         String operation = pressed.getText();
-        if(operation.equals("C")){
-            calcFrame.reset();
-        }
-        if(operation.equals("Backspace")){
-            calcFrame.backspace();
-        }
-        if(operation.equals("CE")){
-            calcFrame.clearEntry();
+        
+        switch(operation){
+            case "C":
+                calcFrame.reset();
+                break;
+            case "Backspace":
+                calcFrame.backspace();
+                break;
+            case "CE":
+                calcFrame.clearEntry();
+                break;
+            case "MC":
+                calcFrame.memoryClear();
+                break;
+            case "MR":
+                calcFrame.memoryRecall();
+                break;
+            case "MS":
+                calcFrame.memoryStore();
+                break;
+            case "M+":
+                calcFrame.memoryPlus();
+                break;
         }
     }
 }

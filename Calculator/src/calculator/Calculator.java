@@ -161,7 +161,6 @@ public class Calculator {
     public void equals(){
         answer = calculate();
         operands[0] = answer;
-        operands[1] = 0.0;
         operands[2] = answer;
         opPointer = 1;
         first = true;
