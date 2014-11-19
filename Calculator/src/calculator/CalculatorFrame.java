@@ -16,6 +16,7 @@ public class CalculatorFrame extends JFrame {
     private String curValue = "";
     private String[] basicOperatorSymbols = {"/", "sqrt", "*", "%", "-", "1/x", "+", "="};
     private String[] operands = {"", ""};
+    private String[] copiedState = {"", "", "", "", ""};
     private int opPointer = 0;
     private String curOperator;
     private double answer = 0.0;
@@ -200,6 +201,8 @@ public class CalculatorFrame extends JFrame {
                 if(!operands[1].equals("")){
                     calc.setOperand(Double.parseDouble(operands[opPointer]));
                     equals(operator);
+                    if(operator.equals("/") && Double.parseDouble(operands[1]) == 0.0)
+                        JOptionPane.showMessageDialog(null, "Division by zero not allowed!");
                     setTextValue();
                 } else {
                     curValue += operator;
@@ -209,19 +212,21 @@ public class CalculatorFrame extends JFrame {
             curOperator = operator;
 
         }else if(operator.equals("=")){
-            calc.setOperand(Double.parseDouble(operands[opPointer]));
+            calc.setOperand(Double.parseDouble(getOperand()));
+            if(curOperator.equals("/") && Double.parseDouble(operands[1]) == 0.0)
+                        JOptionPane.showMessageDialog(null, "Division by zero not allowed!");
             equals("");
-        }else if(operator.equals("sqrt")){
             
-            calc.setOperand(Double.parseDouble(operands[opPointer]));
+        }else if(operator.equals("sqrt")){
+            calc.setOperand(Double.parseDouble(getOperand()));
             calc.sqrt();
             equals("");
         }else if(operator.equals("%")){
-            calc.setOperand(Double.parseDouble(operands[opPointer]));
+            calc.setOperand(Double.parseDouble(getOperand()));
             calc.percent();
             equals("");
         }else if(operator.equals("1/x")){
-            operands[opPointer] = Double.toString(1.0 / Double.parseDouble(operands[opPointer]));
+            operands[opPointer] = Double.toString(1.0 / Double.parseDouble(getOperand()));
             setTextValue();
         }
     }
@@ -229,7 +234,6 @@ public class CalculatorFrame extends JFrame {
     private void equals(String operator){
         String strAnswer;
         calc.equals();
-        calc.toString(true);
         answer = calc.getAnswer();
         System.out.println("" + answer);
         strAnswer = noZero(answer);
@@ -262,6 +266,32 @@ public class CalculatorFrame extends JFrame {
         setTextValue();
     }
     
+    public void copy(){
+        copiedState[0] = operands[0];
+        copiedState[1] = operands[1];
+        copiedState[2] = curOperator;
+        copiedState[3] = "" + opPointer;
+        copiedState[4] = Boolean.toString(operation);
+    }
+    
+    public void paste(){
+        calc.reset();
+        operands[0] = copiedState[0];
+        calc.setOperand(Double.parseDouble(operands[0]));
+        if(!copiedState[2].equals("")){
+            curOperator = copiedState[2];
+            calc.setOperator(curOperator);
+        }
+        if(!copiedState[2].equals("")){
+            operands[1] = copiedState[1];
+            calc.setOperand(Double.parseDouble(operands[1]));
+        }
+        opPointer = Integer.parseInt(copiedState[3]);
+        operation = Boolean.parseBoolean(copiedState[4]);
+        setTextValue();
+        System.out.println(copiedState[0] + " " + copiedState[1] + " " + copiedState[2] + " " + copiedState[3] + " " + copiedState[4]);
+    }
+    
     /**
      * Helper method to strip of zeros for whole numbers
      * @param num the number to be formatted
@@ -284,6 +314,15 @@ public class CalculatorFrame extends JFrame {
         }
         
         
+    }
+    
+    public String getOperand(){
+        
+        if(opPointer == 1 && operands[1] == "")
+           return operands[0];
+
+        return (operands[opPointer] == "") ? "0" : operands[opPointer];
+    
     }
     
     

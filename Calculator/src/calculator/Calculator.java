@@ -41,7 +41,7 @@ public class Calculator {
      * @return the answer of the current calculation
      */
     private double calculate(){
-        double answer = 0.0;
+        String op = curOperator == null ? "" : curOperator;
         switch(curOperator){
             case "+":
                 answer = operands[0] + operands[1];
@@ -53,7 +53,10 @@ public class Calculator {
                 answer = operands[0] * operands[1];
                 break;
             case "/":
-                answer = operands[0] / operands[1];
+                if(operands[1] == 0)
+                    answer = 0;
+                else
+                    answer = operands[0] / operands[1];
                 break;
             default:
                 answer = operands[0];
@@ -96,7 +99,10 @@ public class Calculator {
      * get the square root of the current operand
      */
     public void sqrt(){
-        operands[2] = Math.sqrt(operands[opPointer]);
+        if(operands[opPointer] == -1)
+            operands[2] = -1;
+        else
+            operands[2] = Math.sqrt(operands[opPointer]);
         operands[opPointer] = operands[2];
     }
     

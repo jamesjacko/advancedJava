@@ -27,7 +27,7 @@ public class CalculatorMenu extends JMenuBar {
     private JMenu editMenu(){
         JMenu menu = new JMenu("Edit");
         menu.add(createMenuItem("Copy"));
-        menu.add(createMenuItem("Paste", false));
+        menu.add(createMenuItem("Paste"));
         return menu;
     }
     private JMenu viewMenu(){
@@ -80,6 +80,12 @@ public class CalculatorMenu extends JMenuBar {
                     helpFrame.setSize(500, 500);
                     helpFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
                     helpFrame.setVisible(true);
+                    break;
+                case "Copy":
+                    frame.copy();
+                    break;
+                case "Paste":
+                    frame.paste();
                     break;
             } 
         }
