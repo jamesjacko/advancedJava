@@ -1,15 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package calculator;
 
 import java.text.DecimalFormat;
 
 /**
  *
- * @author jacko
+ * @author James Jackson
+ * Calculator class contains the logic of a calculator 
+ * @date 20/11/2014
  */
 public class Calculator {
     /* operands used in calculation
@@ -74,6 +71,7 @@ public class Calculator {
        this.operands[2] = 0.0;
        this.answer = 0;
        this.first = true;
+       
     }
     
     /**
@@ -102,8 +100,15 @@ public class Calculator {
         if(operands[opPointer] == -1)
             operands[2] = -1;
         else
-            operands[2] = Math.sqrt(operands[opPointer]);
-        operands[opPointer] = operands[2];
+            if(first){
+                operands[2] = Math.sqrt(operands[0]);
+                operands[0] = operands[2];
+            } else {
+                operands[2] = Math.sqrt(operands[1]);
+                operands[1] = operands[2];
+            }
+            
+        
     }
     
     /**
@@ -117,6 +122,14 @@ public class Calculator {
         } else {
             operands[1] = operands[0] * operands[1] / 100;
         }
+    }
+    
+    /**
+     * Sets the current operand to it's reciprocal
+     */
+    public void reciprocal(){
+        int point = (first)? 0 : 1;
+        operands[point] = (operands[point] == 0.0)? 0.0 : 1.0 / operands[point];
     }
     
     
@@ -147,6 +160,10 @@ public class Calculator {
      * @return the operands in the calculator
      */
     public double[] getOperands(){
+        if(first){
+            double[] ret = {operands[0], 0.0};
+            return ret; 
+        }
         return operands;
     }
     

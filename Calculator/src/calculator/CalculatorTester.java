@@ -1,13 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package calculator;
 
 /**
  *
- * @author jacko
+ * @author James Jackson
+ * Calculator Tester for testing the calculator logic
+ * @date 20/11/2014
  */
 public class CalculatorTester {
     public static void main(String[] args) {
@@ -47,8 +45,16 @@ public class CalculatorTester {
         
         
         calc.reset();
-        calc.setOperand(100.0);
-        calc.sqrt();
+        calc.setOperand(10.0);
+        
+        calc.setOperator("+");
+        calc.setOperand(10.0);
+        calc.equals();
+        
+        
+        System.out.println(calc.toString(false));
+        
+        
         calc.equals();
         System.out.println(calc.toString(false));
         

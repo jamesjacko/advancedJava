@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package calculator;
 
 import javax.swing.*;
@@ -11,6 +7,15 @@ import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import javax.swing.border.*;
+
+
+/**
+ *
+ * @author James Jackson
+ * Calculator Frame class which extend JFrame, uses the calculator class and offers
+ * a GUI for it
+ * @date 20/11/2014
+ */
 public class CalculatorFrame extends JFrame {
     private JTextField input;
     private String curValue = "";
@@ -20,8 +25,12 @@ public class CalculatorFrame extends JFrame {
     private int opPointer = 0;
     private String curOperator;
     private double answer = 0.0;
-    private boolean operation = false, grouping = false;
+    private boolean operation = false, grouping = false, first = false;
     private Calculator calc = new Calculator();
+    
+    /**
+     * Frame constructor builds the layout and sets up the frame
+     */
     public CalculatorFrame(){
         super("Calculator");
         add(buildLayout());
@@ -33,6 +42,11 @@ public class CalculatorFrame extends JFrame {
         
     }
 
+    /**
+     * Builds the top panel of the calculator including text field and top
+     * control buttons
+     * @return the top panel (border layout)
+     */
     private JPanel buildTop(){
         JPanel pnlTop = new JPanel(new BorderLayout());
             input = new JTextField("0");
@@ -54,6 +68,11 @@ public class CalculatorFrame extends JFrame {
             pnlTop.add(ctrlPanel, BorderLayout.SOUTH);
         return pnlTop;
     }
+    
+    /**
+     * Builds the memory button panel
+     * @return the memory button panel (grid layout)
+     */
     private JPanel buildMemoryButtons(){
         JPanel pnlMemoryButtons = new JPanel(new GridLayout(4, 1));
             String[] memLabels = {"MC", "MR", "MS", "M+"};
@@ -68,6 +87,11 @@ public class CalculatorFrame extends JFrame {
             }
         return pnlMemoryButtons;
     }
+    
+    /**
+     * Build the number pad panel including the decimal and negative
+     * @return the number pad panel (grid layout)
+     */
     private JPanel buildNumberPad(){
         JPanel pnlNumberPad = new JPanel(new BorderLayout());
             JPanel pnlNumberButtons = new JPanel(new GridLayout(4,3));
@@ -104,6 +128,11 @@ public class CalculatorFrame extends JFrame {
                 
         return pnlNumberPad;
     }
+    
+    /**
+     * Using the other helper methods build the overall calculator layout
+     * @return the calculator layout
+     */
     private JPanel buildLayout(){
         JPanel pnlLayout = new JPanel(new BorderLayout());
         Border padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
@@ -114,24 +143,39 @@ public class CalculatorFrame extends JFrame {
         return pnlLayout;
     }
     
-    
+    /**
+     * Updates the text field value to that of the calculator's current state.
+     */
     public void setTextValue(){
         //calc.setOperand(operands[opPointer]);
         if(opPointer == 0){
             String operator = (operation && curOperator != null) ? curOperator : "";
             curValue = operands[0].equals("")? "0" + operator: noZero(Double.parseDouble(operands[0].replace(",", ""))) + operator;
         } else {
-            String secOperand = operands[1].equals("")? "0": noZero(Double.parseDouble(operands[1].replace(",", "")));
-            curValue = noZero(Double.parseDouble(operands[0].replace(",", ""))) + curOperator + secOperand;
+            String secOperand = "";
+            String op = "";
+            if(!first){
+                secOperand = operands[1].equals("")? "0": noZero(Double.parseDouble(operands[1].replace(",", "")));
+                op = curOperator;
+            }
+            curValue = noZero(Double.parseDouble(operands[0].replace(",", ""))) + op + secOperand;
         }
         input.setText(curValue);
     }
+    
+    /**
+     * Processes a backspace on the current operand
+     */
     public void backspace(){
         if(operands[opPointer].length() > 0){
             operands[opPointer] = operands[opPointer].substring(0, operands[opPointer].length() - 1);
             setTextValue();
         }
     }
+    
+    /**
+     * clears the last entry into the calculator
+     */
     public void clearEntry(){
         if(opPointer == 1 && !operands[1].equals("")){
             operands[1] = "";
@@ -146,6 +190,10 @@ public class CalculatorFrame extends JFrame {
         setTextValue();
         
     }
+    
+    /**
+     * resets the calculator, does not clear memory of clipboard
+     */
     public void reset(){
        this.curValue = this.curOperator = this.operands[0] = this.operands[1] = "";
        this.opPointer = 0;
@@ -153,10 +201,16 @@ public class CalculatorFrame extends JFrame {
        calc.reset();
     }
     
+    /**
+     * clears the calculators memory
+     */
     public void memoryClear(){
         calc.memoryClear();
     }
     
+    /**
+     * Recalls the calculator memory into the current operand
+     */
     public void memoryRecall(){
         double mem = calc.memoryRecall();
         calc.setOperand(mem);
@@ -164,73 +218,112 @@ public class CalculatorFrame extends JFrame {
         setTextValue();
     }
     
+    /**
+     * Stores the current value of the operand into memory, overwriting
+     */
     public void memoryStore(){
-        if(operands[opPointer] == "")
-            calc.setOperand(Double.parseDouble(operands[0]));
-        else
-            calc.setOperand(Double.parseDouble(operands[opPointer]));
+        calc.setOperand(Double.parseDouble(getOperand()));
         calc.memoryStore();
         System.out.println("here: " + calc.memoryRecall());
     }
     
+    /**
+     * Adds the current operand value to the memory value
+     */
     public void memoryPlus(){
-        if(operands[opPointer] == "")
-            calc.setOperand(Double.parseDouble(operands[0]));
-        else
-            calc.setOperand(Double.parseDouble(operands[opPointer]));
+        calc.setOperand(Double.parseDouble(getOperand()));
         calc.memoryPlus();
     }
     
+    /**
+     * process an operator button being pressed
+     * @param operator the operator that was pressed
+     */
     public void operatorPress(String operator){
-        
         operation = true;
         // Sorted array of operators, needed for binary search
         String[] coreOperators = {"*", "+", "-", "/"};
         curValue = input.getText().replace(",", "");
         
+        //if this is a core operator
         if(Arrays.binarySearch(coreOperators, operator) > -1){
-            if(opPointer == 0){
-                operands[0] = input.getText().replace(",", "");
-                curValue = curValue + operator;
-                input.setText(curValue);
-                calc.setOperand(Double.parseDouble(operands[opPointer]));
-                calc.setOperator(operator);
-                opPointer = 1;
-            }else{
-                calc.setOperator(curOperator);
-                if(!operands[1].equals("")){
-                    calc.setOperand(Double.parseDouble(operands[opPointer]));
-                    equals(operator);
-                    if(operator.equals("/") && Double.parseDouble(operands[1]) == 0.0)
-                        JOptionPane.showMessageDialog(null, "Division by zero not allowed!");
-                    setTextValue();
-                } else {
-                    curValue += operator;
-                    setTextValue();
-                }
+            coreOps(operator);
+        // any other operator
+        } else {
+            otherOps(operator);   
+        }
+    }
+    
+    /**
+     * Process for the core operators ( + , - , / , *)
+     * NB: Division by 0 give 0 as output
+     * @param operator the operator to be processed
+     */
+    private void coreOps(String operator){
+        // first operand is enterered (only run once at the begining)
+        if(opPointer == 0){
+            calc.setOperand(Double.parseDouble(getOperand()));
+            calc.setOperator(operator);
+            curOperator = operator;
+            setTextValue();
+            opPointer = 1;
+        // if we are on the second operand but not just after equals has processed
+        }else if(!first){
+            if(operands[1] != ""){
+                calc.setOperand(Double.parseDouble(getOperand()));
+                equals(curOperator);
             }
             curOperator = operator;
-
-        }else if(operator.equals("=")){
-            calc.setOperand(Double.parseDouble(getOperand()));
-            if(curOperator.equals("/") && Double.parseDouble(operands[1]) == 0.0)
-                        JOptionPane.showMessageDialog(null, "Division by zero not allowed!");
-            equals("");
-            
-        }else if(operator.equals("sqrt")){
-            calc.setOperand(Double.parseDouble(getOperand()));
-            calc.sqrt();
-            equals("");
-        }else if(operator.equals("%")){
-            calc.setOperand(Double.parseDouble(getOperand()));
-            calc.percent();
-            equals("");
-        }else if(operator.equals("1/x")){
-            operands[opPointer] = Double.toString(1.0 / Double.parseDouble(getOperand()));
+            setTextValue();
+        // equals has just been pressed so we need to work slightly diferently
+        } else {
+            calc.setOperator(operator);
+            curOperator = operator;
+            first = false;
+            setTextValue();
+        }
+        first = false;
+    }
+    
+    /**
+     * Processes for all other operators (sqrt , % , 1/x , =)
+     * NB Reciprocal 0 give 0 as output
+     * @param operator the operator to be processed
+     */
+    private void otherOps(String operator){
+        double ops[];
+        calc.setOperand(Double.parseDouble(getOperand()));
+        switch(operator){
+            case "sqrt":
+                if(Double.parseDouble(getOperand()) > 0)
+                    calc.sqrt();
+                else
+                    JOptionPane.showMessageDialog(null, "Sorry you can't square root a negative number");
+                break;
+            case "%":
+                calc.percent();
+                break;
+            case "1/x":
+                calc.reciprocal();
+                System.out.println(calc.toString(false));
+                break;
+            case "=":
+                equals("");
+                break;
+        }
+        if(!operator.equals("=")){
+            ops = calc.getOperands();
+            operands[0] = noZero(ops[0]);
+            operands[1] = noZero(ops[1]);
             setTextValue();
         }
     }
     
+    /**
+     * Equals method to work out the current calculation
+     * @param operator the operator to be written, this keeps the old operator
+     * when an operator invokes the method.
+     */
     private void equals(String operator){
         String strAnswer;
         calc.equals();
@@ -239,11 +332,18 @@ public class CalculatorFrame extends JFrame {
         strAnswer = noZero(answer);
         operands[0] = strAnswer;
         operands[1] = "";
+        // equals is called on operator press as well as = button so we must
+        // ensure that the operator is the old one not the new one pressed.
         curValue = strAnswer + operator;
         input.setText(curValue);
         opPointer = 1;
+        // first var to show that a new operator press will need a second operand
+        first = true;
     }
     
+    /**
+     * Negates the value of the operand
+     */
     public void negate(){
         if(opPointer == 1 && operands[1] == "")
             operands[0] = (operands[0].charAt(0) == '-')? operands[0].substring(1) : "-" + operands[0];
@@ -251,21 +351,35 @@ public class CalculatorFrame extends JFrame {
            operands[opPointer] = (operands[opPointer].charAt(0) == '-')? operands[opPointer].substring(1) : "-" + operands[opPointer];
     }
     
+    /**
+     * Adds a decimal point tot the current operand
+     */
     public void addDecimal(){
         operands[opPointer] = (operands[opPointer].contains("."))? operands[opPointer] : operands[opPointer] + "." ;
     }
     
+    /**
+     * Adds a new character (number) to the current operand
+     * @param num the String representation of an integer to be added.
+     */
     public void addToOperand(String num){
         operands[opPointer] += num;
         operands[opPointer] = operands[opPointer];
         setTextValue();
     }
     
-    public void setGrouping(){
-        grouping = !grouping;
+    /**
+     * Set the grouping for display to on or off
+     * @param group whether to group or not
+     */
+    public void setGrouping(boolean group){
+        grouping = group;
         setTextValue();
     }
     
+    /**
+     * Copies the current calculator state to the clipboard
+     */
     public void copy(){
         copiedState[0] = operands[0];
         copiedState[1] = operands[1];
@@ -274,6 +388,9 @@ public class CalculatorFrame extends JFrame {
         copiedState[4] = Boolean.toString(operation);
     }
     
+    /**
+     * pastes the copied state into the calculator
+     */
     public void paste(){
         calc.reset();
         operands[0] = copiedState[0];
@@ -306,7 +423,14 @@ public class CalculatorFrame extends JFrame {
         return strNum;
     }
     
+    /**
+     * operator press inner class
+     */
     private class operatorListener implements ActionListener{
+        /**
+         * Method to run when a button is clicked
+         * @param e the event that triggered the method
+         */
         public void actionPerformed(ActionEvent e){
             JButton pressed = (JButton) e.getSource();            
             String operator = pressed.getText();
@@ -316,12 +440,16 @@ public class CalculatorFrame extends JFrame {
         
     }
     
-    public String getOperand(){
+    /**
+     * Gets the sanitized current operand
+     * @return 
+     */
+    private String getOperand(){
         
         if(opPointer == 1 && operands[1] == "")
-           return operands[0];
+           return operands[0].replace(",", "");
 
-        return (operands[opPointer] == "") ? "0" : operands[opPointer];
+        return (operands[opPointer] == "") ? "0" : operands[opPointer].replace(",", "");
     
     }
     
